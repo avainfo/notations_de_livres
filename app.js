@@ -1,7 +1,9 @@
 const express = require('express');
+const {sign} = require("jsonwebtoken");
 const User = require('./models/UserModel');
 const connect = require('./utils/api')
 const hash = require('./utils/hash');
+require('dotenv').config();
 
 const app = express();
 const router = express.Router();
@@ -24,8 +26,32 @@ router.post('/auth/signup', async (req, res, next) => {
 	user.save()
 		.then((e) => res.status(200).json({'message': e}))
 		.catch((e) => res.status(401).json(e.errorResponse));
-
-	res.status(200).json(req.body);
 });
+
+router.post('/auth/login', async (req, res, next) => {
+	const email = req.body["email"];
+	let password = await hash(req.body["password"]);
+
+	User.findOne({email: email})
+		.then(user => {
+			if (!user) {
+				res.status(401).json({error: 'Utilisateur non trouvé !'});
+			}
+			if (password !== user.password) {
+				res.status(401).json({error: 'Mot de passe incorrect !'});
+			} else {
+				res.status(200).json({
+					userId: user._id, token: sign({
+						userId: user._id
+					}, process.env.JWT_SECRET, {
+						expiresIn: '24h'
+					},)
+				});
+			}
+		})
+		.catch(error => res.status(500).json({error}));
+})
+
+app.use('/api', router);
 
 module.exports = app;
