@@ -4,6 +4,7 @@ const connect = require('./utils/api')
 const hash = require('./utils/hash');
 
 const app = express();
+const router = express.Router();
 
 const cors = require('cors');
 
@@ -13,7 +14,7 @@ app.use(cors())
 
 app.use(express.json());
 
-app.post('/api/auth/signup', async (req, res, next) => {
+router.post('/auth/signup', async (req, res, next) => {
 	const email = req.body["email"];
 	let password = req.body["password"];
 
