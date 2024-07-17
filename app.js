@@ -14,7 +14,6 @@ app.use(cors())
 app.use(express.json());
 
 app.post('/api/auth/signup', async (req, res, next) => {
-	console.log(req.body);
 	const email = req.body["email"];
 	let password = req.body["password"];
 
