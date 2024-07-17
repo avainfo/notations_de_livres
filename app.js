@@ -20,7 +20,9 @@ app.post('/api/auth/signup', async (req, res, next) => {
 	password = await hash(password);
 
 	const user = new User({email, password});
-	user.save();
+	user.save()
+		.then((e) => res.status(200).json({'message': e}))
+		.catch((e) => res.status(401).json(e.errorResponse));
 
 	res.status(200).json(req.body);
 });
