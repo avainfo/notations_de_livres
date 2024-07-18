@@ -1,12 +1,12 @@
 const hash = require("./Hash");
 const User = require("../models/UserModel");
+const Book = require("../models/BookModel");
 const {sign} = require("jsonwebtoken");
 
 const routes = [
-	{method: "post", path: "/auth/signup", action: signup},
-	{method: "post", path: "/auth/login", action: login},
 	{method: "post", path: "/auth/signup", action: signup, auth: false},
 	{method: "post", path: "/auth/login", action: login, auth: false},
+	{method: "get", path: "/books", action: getBooks, auth: false},
 ]
 
 function signup() {
@@ -48,6 +48,20 @@ function login() {
 			})
 			.catch(error => res.status(500).json({error}));
 	};
+}
+
+function getBooks() {
+	return async (req, res, next) => {
+		Book.find()
+			.then(books => {
+				if (!books) {
+					res.status(401).json({error: 'Aucun livre trouvé !'});
+				} else {
+					res.status(200).json(books);
+				}
+			})
+			.catch(error => res.status(500).json({error}));
+	}
 }
 
 module.exports = routes;

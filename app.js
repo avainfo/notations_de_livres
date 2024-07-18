@@ -24,6 +24,8 @@ for (let r of routes) {
 		}
 
 		else if (r.method === "get") {
+		} else if (r.method === "get") {
+			router.get(r.path, r.action())
 		}
 	}
 }
