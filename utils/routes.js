@@ -5,6 +5,8 @@ const {sign} = require("jsonwebtoken");
 const routes = [
 	{method: "post", path: "/auth/signup", action: signup},
 	{method: "post", path: "/auth/login", action: login},
+	{method: "post", path: "/auth/signup", action: signup, auth: false},
+	{method: "post", path: "/auth/login", action: login, auth: false},
 ]
 
 function signup() {

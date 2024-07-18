@@ -17,9 +17,14 @@ app.use(cors())
 
 app.use(express.json());
 
-for(let r of routes) {
-	if(r.method === "post") {
-		router.post(r.path, r.action())
+for (let r of routes) {
+	if (!r.auth) {
+		if (r.method === "post") {
+			router.post(r.path, r.action())
+		}
+
+		else if (r.method === "get") {
+		}
 	}
 }
 
