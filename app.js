@@ -21,9 +21,6 @@ for (let r of routes) {
 	if (!r.auth) {
 		if (r.method === "post") {
 			router.post(r.path, r.action())
-		}
-
-		else if (r.method === "get") {
 		} else if (r.method === "get") {
 			router.get(r.path, r.action())
 		}
