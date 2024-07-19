@@ -6,6 +6,7 @@ const {sign} = require("jsonwebtoken");
 const routes = [
 	{method: "post", path: "/auth/signup", action: signup, auth: false},
 	{method: "post", path: "/auth/login", action: login, auth: false},
+	{method: "get", path: "/books/bestrating", action: getBestRating, auth: false},
 	{method: "get", path: "/books", action: getBooks, auth: false},
 	{method: "get", path: "/books/:id", action: getBooks, auth: false},
 ]
@@ -74,6 +75,25 @@ function getBooks() {
 				})
 				.catch(error => res.status(500).json({error}));
 		}
+	}
+}
+
+
+function getBestRating() {
+	return async (req, res, next) => {
+		Book.find()
+			.sort({averageRating: -1})
+			.limit(3)
+			.then(books => {
+				if (!books) {
+					res.status(401).json({error: 'Aucun livre trouvé !'});
+				} else {
+					res.status(200).json(books);
+				}
+			})
+			.catch(error => {
+				res.status(500).json({error})
+			});
 	}
 }
 
