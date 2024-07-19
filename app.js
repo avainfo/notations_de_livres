@@ -21,8 +21,7 @@ const storage = multer.diskStorage({
 		cb(null, 'assets/')
 	},
 	filename: function (req, file, cb) {
-		const uniqueSuffix = Date.now();
-		cb(null, uniqueSuffix + path.extname(file.originalname));
+		cb(null, file.originalname);
 	}
 });
 
