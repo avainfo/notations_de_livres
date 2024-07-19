@@ -15,12 +15,9 @@ const routes = [
 function signup() {
 	return async (req, res, next) => {
 		const email = req.body["email"];
-		let password = req.body["password"];
+		let password = await hash(req.body["password"]);
 
-		password = await hash(password);
-
-		const user = new User({email, password});
-		user.save()
+		new User({email, password}).save()
 			.then((e) => res.status(200).json({'message': e}))
 			.catch((e) => res.status(401).json(e.errorResponse));
 	};
@@ -35,8 +32,7 @@ function login() {
 			.then(user => {
 				if (!user) {
 					res.status(401).json({error: 'Utilisateur non trouvé !'});
-				}
-				if (password !== user.password) {
+				} else if (password !== user.password) {
 					res.status(401).json({error: 'Mot de passe incorrect !'});
 				} else {
 					res.status(200).json({
@@ -100,13 +96,8 @@ function getBestRating() {
 
 function addBook() {
 	return async (req, res, next) => {
-		console.error("Entered")
 		let jsonBook = JSON.parse(req.body.book)
-		console.error("Parsed : " + JSON.stringify(jsonBook))
-		console.error(req.file)
 		delete jsonBook.userId;
-
-		console.log(req.body.book.year)
 		jsonBook.year = parseInt(jsonBook.year)
 
 		const book = new Book({
@@ -114,8 +105,6 @@ function addBook() {
 			...jsonBook,
 			imageUrl: `${req.protocol}://${req.get('host')}/assets/${req.file.filename}`
 		});
-
-		console.error(jsonBook)
 
 		book.save()
 			.then(() => res.status(201).json({message: "Livre ajouté !"}))
