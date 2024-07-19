@@ -4,11 +4,12 @@ const Book = require("../models/BookModel");
 const {sign} = require("jsonwebtoken");
 
 const routes = [
-	{method: "post", path: "/auth/signup", action: signup, auth: false},
-	{method: "post", path: "/auth/login", action: login, auth: false},
-	{method: "get", path: "/books/bestrating", action: getBestRating, auth: false},
-	{method: "get", path: "/books", action: getBooks, auth: false},
-	{method: "get", path: "/books/:id", action: getBooks, auth: false},
+	{method: "post", path: "/auth/signup", action: signup, auth: false, file: false},
+	{method: "post", path: "/auth/login", action: login, auth: false, file: false},
+	{method: "get", path: "/books/bestrating", action: getBestRating, auth: false, file: false},
+	{method: "get", path: "/books", action: getBooks, auth: false, file: false},
+	{method: "get", path: "/books/:id", action: getBooks, auth: false, file: false},
+	{method: "post", path: "/books", action: addBook, auth: true, file: true},
 ]
 
 function signup() {
@@ -93,6 +94,34 @@ function getBestRating() {
 			})
 			.catch(error => {
 				res.status(500).json({error})
+			});
+	}
+}
+
+function addBook() {
+	return async (req, res, next) => {
+		console.error("Entered")
+		let jsonBook = JSON.parse(req.body.book)
+		console.error("Parsed : " + JSON.stringify(jsonBook))
+		console.error(req.file)
+		delete jsonBook.userId;
+
+		console.log(req.body.book.year)
+		jsonBook.year = parseInt(jsonBook.year)
+
+		const book = new Book({
+			userId: req.auth.userId,
+			...jsonBook,
+			imageUrl: `${req.protocol}://${req.get('host')}/assets/${req.file.filename}`
+		});
+
+		console.error(jsonBook)
+
+		book.save()
+			.then(() => res.status(201).json({message: "Livre ajouté !"}))
+			.catch(error => {
+				console.error(error)
+				res.status(500).json({error: error})
 			});
 	}
 }
