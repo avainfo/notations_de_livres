@@ -34,31 +34,17 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use('/uploads', express.static('uploads'));
 
-for (let r of routes) {
-	if (!r.auth) {
-		switch (r.method) {
-			case "post":
-				if (!r.file) router.post(r.path, r.action())
-				else router.post(r.path, (req, res, next) => {
-					next()
-				}, upload.single("image"), r.action())
-				break;
-			case "get":
-				router.get(r.path, r.action())
-				break;
-		}
-	} else {
-		switch (r.method) {
-			case "post":
-				if (!r.file) router.post(r.path, auth, r.action())
-				else router.post(r.path, ...[auth, upload.single("image"), r.action()])
-				break;
-			case "get":
-				router.get(r.path, auth, r.action())
-				break;
-		}
-	}
-}
+const setupRoute = (r, middlewares = []) => {
+	router[r.method](r.path, ...middlewares, r.action());
+};
+
+routes.forEach(r => {
+	const middlewares = [];
+	if (r.auth) middlewares.push(auth);
+	if (r.file) middlewares.push(upload.single("image"));
+	setupRoute(r, middlewares);
+});
+
 
 app.use('/api', router);
 
