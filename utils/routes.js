@@ -2,6 +2,7 @@ const hash = require("./Hash");
 const User = require("../models/UserModel");
 const Book = require("../models/BookModel");
 const {sign} = require("jsonwebtoken");
+const deleteFile = require("./fileManipulation");
 
 const routes = [
 	{method: "post", path: "/auth/signup", action: signup, auth: false, file: false},
@@ -11,6 +12,7 @@ const routes = [
 	{method: "get", path: "/books/:id", action: getBooks, auth: false, file: false},
 	{method: "post", path: "/books", action: addBook, auth: true, file: true},
 	{method: "put", path: "/books/:id", action: updateBook, auth: true, file: true},
+	{method: "delete", path: "/books/:id", action: deleteBook, auth: false, file: false},
 ]
 
 function signup() {
@@ -131,6 +133,22 @@ function updateBook() {
 		Book.updateOne({_id: req.params.id}, update)
 			.then(() => res.status(201).json({message: "Livre mis a jour !"}))
 			.catch(error => res.status(500).json({error: error}));
+	}
+}
+
+function deleteBook() {
+	return async (req, res, next) => {
+		const book = await Book.findOne({_id: req.params.id});
+		try {
+			await Book.deleteOne({_id: req.params.id})
+			const similarImages = await Book.find({imageUrl: book.imageUrl});
+			if (similarImages.length === 0) {
+				deleteFile(book.imageUrl.split("/").pop());
+			}
+			res.status(200).json({message: "Livre supprimé !"})
+		} catch (e) {
+			res.status(500).json({error: "Error"})
+		}
 	}
 }
 
