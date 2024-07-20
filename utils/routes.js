@@ -10,6 +10,7 @@ const routes = [
 	{method: "get", path: "/books", action: getBooks, auth: false, file: false},
 	{method: "get", path: "/books/:id", action: getBooks, auth: false, file: false},
 	{method: "post", path: "/books", action: addBook, auth: true, file: true},
+	{method: "put", path: "/books/:id", action: updateBook, auth: true, file: true},
 ]
 
 function signup() {
@@ -108,10 +109,28 @@ function addBook() {
 
 		book.save()
 			.then(() => res.status(201).json({message: "Livre ajouté !"}))
-			.catch(error => {
-				console.error(error)
-				res.status(500).json({error: error})
-			});
+			.catch(error => res.status(500).json({error: error}));
+	}
+}
+
+function updateBook() {
+	return async (req, res, next) => {
+		let update;
+		if (req.file) {
+			let jsonBook = JSON.parse(req.body.book)
+			delete jsonBook.userId;
+			update = {
+				...jsonBook,
+				imageUrl: `${req.protocol}://${req.get('host')}/assets/${req.file.filename}`
+			}
+		} else {
+			update = {
+				...req.body
+			}
+		}
+		Book.updateOne({_id: req.params.id}, update)
+			.then(() => res.status(201).json({message: "Livre mis a jour !"}))
+			.catch(error => res.status(500).json({error: error}));
 	}
 }
 
