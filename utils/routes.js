@@ -3,6 +3,7 @@ const User = require("../models/UserModel");
 const Book = require("../models/BookModel");
 const {sign} = require("jsonwebtoken");
 const deleteFile = require("./fileManipulation");
+const bodyParser = require("body-parser");
 
 const routes = [
 	{method: "post", path: "/auth/signup", action: signup, auth: false, file: false},
@@ -12,7 +13,8 @@ const routes = [
 	{method: "get", path: "/books/:id", action: getBooks, auth: false, file: false},
 	{method: "post", path: "/books", action: addBook, auth: true, file: true},
 	{method: "put", path: "/books/:id", action: updateBook, auth: true, file: true},
-	{method: "delete", path: "/books/:id", action: deleteBook, auth: false, file: false},
+	{method: "delete", path: "/books/:id", action: deleteBook, auth: true, file: false},
+	{method: "post", path: "/books/:id/rating", action: rateBook, auth: true, file: false},
 ]
 
 function signup() {
@@ -149,6 +151,26 @@ function deleteBook() {
 		} catch (e) {
 			res.status(500).json({error: "Error"})
 		}
+	}
+}
+
+function rateBook() {
+	return async (req, res, next) => {
+
+		const book = await Book.findOne({_id: req.params.id});
+		let averageRating = (book.ratings.reduce((a, b) => a + b.grade, 0) + req.body.rating) / (book.ratings.length + 1);
+
+		await Book.updateOne({_id: req.params.id}, {
+			$push: {
+				ratings: {
+					userId: req.body.userId,
+					grade: req.body.rating
+				}
+			},
+			averageRating: averageRating
+		})
+			.then(async () => res.status(201).json(await Book.findOne({_id: req.params.id})))
+			.catch(error => res.status(500).json({error: error}));
 	}
 }
 
