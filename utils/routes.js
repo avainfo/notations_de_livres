@@ -3,7 +3,6 @@ const User = require("../models/UserModel");
 const Book = require("../models/BookModel");
 const {sign} = require("jsonwebtoken");
 const deleteFile = require("./fileManipulation");
-const bodyParser = require("body-parser");
 
 const routes = [
 	{method: "post", path: "/auth/signup", action: signup, auth: false, file: false},
@@ -18,7 +17,7 @@ const routes = [
 ]
 
 function signup() {
-	return async (req, res, next) => {
+	return async (req, res) => {
 		const email = req.body["email"];
 		let password = await hash(req.body["password"]);
 
@@ -29,7 +28,7 @@ function signup() {
 }
 
 function login() {
-	return async (req, res, next) => {
+	return async (req, res) => {
 		const email = req.body["email"];
 		let password = await hash(req.body["password"]);
 
@@ -55,7 +54,7 @@ function login() {
 }
 
 function getBooks() {
-	return async (req, res, next) => {
+	return async (req, res) => {
 		if (!req.params.id) {
 			Book.find()
 				.then(books => {
@@ -82,7 +81,7 @@ function getBooks() {
 
 
 function getBestRating() {
-	return async (req, res, next) => {
+	return async (req, res) => {
 		Book.find()
 			.sort({averageRating: -1})
 			.limit(3)
@@ -139,7 +138,7 @@ function updateBook() {
 }
 
 function deleteBook() {
-	return async (req, res, next) => {
+	return async (req, res) => {
 		const book = await Book.findOne({_id: req.params.id});
 		try {
 			await Book.deleteOne({_id: req.params.id})
@@ -155,7 +154,7 @@ function deleteBook() {
 }
 
 function rateBook() {
-	return async (req, res, next) => {
+	return async (req, res) => {
 
 		const book = await Book.findOne({_id: req.params.id});
 		let averageRating = (book.ratings.reduce((a, b) => a + b.grade, 0) + req.body.rating) / (book.ratings.length + 1);
