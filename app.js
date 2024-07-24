@@ -1,5 +1,5 @@
 const express = require('express');
-const connect = require('./utils/api')
+const connect = require('./utils/db')
 const auth = require('./middleware/auth');
 const multer = require('multer');
 const cors = require('cors');
