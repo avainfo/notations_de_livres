@@ -1,5 +1,5 @@
 const Book = require("../models/BookModel");
-const deleteFile = require("../utils/fileManipulation");
+const fs = require("node:fs");
 
 function getBooks() {
 	return async (req, res) => {
@@ -119,6 +119,14 @@ function rateBook() {
 			.then(async () => res.status(201).json(await Book.findOne({_id: req.params.id})))
 			.catch(error => res.status(500).json({error: error}));
 	}
+}
+
+function deleteFile(fileName) {
+	fs.unlink("./assets/" + fileName, (err) => {
+		if (err) {
+			console.error('Error deleting file:', err);
+		}
+	});
 }
 
 module.exports = {getBooks, getBestRating, addBook, updateBook, deleteBook, rateBook}
